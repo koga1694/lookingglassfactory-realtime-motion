@@ -15,9 +15,6 @@ import time
 import tensorflow as tf
 
 
-
-from keras_cv_attention_models import mobilevit
-
 #
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
