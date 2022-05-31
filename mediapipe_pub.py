@@ -15,6 +15,9 @@ import time
 import tensorflow as tf
 
 
+
+# from keras_cv_attention_models import mobilevit
+
 #
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
@@ -38,7 +41,8 @@ class CvFpsCalc(object):
 
 def main():
     # --- 설정 ---
-
+    count = 1
+    start = time.time()
     # ZMQ bind
     context = zmq.Context()
     sockets = context.socket(zmq.PUB)
@@ -84,7 +88,7 @@ def main():
 
 
     # --- mobile_VIT 모델
-    mobile_VIT=tf.keras.models.load_model('C:\workplace\zmq\mobile_VIT.h5')
+    mobile_VIT=tf.keras.models.load_model('mobile_VIT.h5')
 
     # --- mediapipe 모델
     
@@ -128,8 +132,20 @@ def main():
         # face detection result
         d_results = face_detection.process(image)
 
-        emotion = emotion_recognition(d_results, debug_image, mobile_VIT)
-        dicts['emotion'] = [emotion]
+        # emotion
+        # start = time.time()
+        
+        if count / 1 == 1:
+            emotion = emotion_recognition(d_results, debug_image, mobile_VIT)
+            dicts['emotion'] = [emotion]
+            count += 1
+            print("time :", time.time() - start)
+
+        elif count / 5 == 1:
+            count = 1
+
+        else:
+            count += 1
         
 
         # holistic result
@@ -159,12 +175,14 @@ def main():
 
         dicts_json = json.dumps(dicts)
         sockets.send_json(dicts_json)
+        print(display_fps)
+
 
 
         cv.imshow('MediaPipe Holistic', debug_image)
         if cv.waitKey(5) & 0xFF == 27:
-            print(dicts_json)
-            print(display_fps)
+            # print(dicts_json)
+            # print(display_fps)
 
             break
 
